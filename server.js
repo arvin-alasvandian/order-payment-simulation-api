@@ -4,9 +4,9 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.json({ ok: true, message: 'API is running' });
-});
+const healthRoutes = require('./routes/health');
+app.use('/', healthRoutes);
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

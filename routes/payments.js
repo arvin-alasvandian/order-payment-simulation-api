@@ -44,4 +44,16 @@ router.post('/', async (req, res) => {
   }
 });
 
+// GET /payments/:id -> fetch single payment by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const payment = await Payment.findById(req.params.id).lean();
+    if (!payment) return res.status(404).json({ ok: false, error: 'payment not found' });
+    res.json({ ok: true, payment });
+  } catch {
+    res.status(400).json({ ok: false, error: 'invalid id' });
+  }
+});
+
+
 module.exports = router;

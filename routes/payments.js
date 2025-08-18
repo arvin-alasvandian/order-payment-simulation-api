@@ -10,6 +10,7 @@ router.get('/', async (_req, res) => {
   res.json({ ok: true, count: payments.length, payments });
 });
 
+
 // POST /payments
 // body: { orderId: "<ObjectId>", method: "card|wallet|bank", outcome?: "success|fail" }
 router.post('/', async (req, res) => {

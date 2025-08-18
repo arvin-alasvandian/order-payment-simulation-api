@@ -4,26 +4,29 @@ const Order = require('../models/Order');
 
 function calcAmount(items = []) {
   return items.reduce((sum, it) => {
-    const qty = Number(it?.qty || 0);
-    const price = Number(it?.price || 0);
+    const qty = Number(it?.qty ?? 0);
+    const price = Number(it?.price ?? 0);
     if (!Number.isFinite(qty) || !Number.isFinite(price) || qty <= 0 || price < 0) return sum;
     return sum + qty * price;
   }, 0);
 }
 
 // GET /orders -> list latest first
-router.get('/', async (req, res) => {
+router.get('/', async (_req, res) => {
   const orders = await Order.find().sort({ createdAt: -1 }).lean();
   res.json({ ok: true, count: orders.length, orders });
 });
 
-// POST /orders -> create in DB
+// POST /orders -> create in DB; amount is computed server-side
 router.post('/', async (req, res) => {
   try {
     const { items, currency } = req.body || {};
-    if (!Array.isArray(items) || items.length === 0)
+    if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ ok: false, error: 'items array is required' });
-    if (!currency) return res.status(400).json({ ok: false, error: 'currency is required' });
+    }
+    if (!currency || typeof currency !== 'string') {
+      return res.status(400).json({ ok: false, error: 'currency is required' });
+    }
 
     const amount = calcAmount(items);
     const order = await Order.create({ items, currency, amount, status: 'PENDING' });
@@ -32,5 +35,16 @@ router.post('/', async (req, res) => {
     res.status(400).json({ ok: false, error: err.message });
   }
 });
+
+router.get('/:id', async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id).lean();
+    if (!order) return res.status(404).json({ ok: false, error: 'order not found' });
+    res.json({ ok: true, order });
+  } catch {
+    res.status(400).json({ ok: false, error: 'invalid id' });
+  }
+});
+
 
 module.exports = router;

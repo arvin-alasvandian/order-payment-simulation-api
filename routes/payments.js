@@ -1,8 +1,8 @@
 // routes/payments.js
 const { Router } = require('express');
 const router = Router();
-const Order = require('../models/Order');
-const Payment = require('../models/Payment');
+const Order = require('../models/order');
+const Payment = require('../models/payment');
 
 // GET /payments -> list latest first
 router.get('/', async (_req, res) => {

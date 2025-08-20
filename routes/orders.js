@@ -67,9 +67,23 @@ router.get('/:id', validate(idSchema), async (req, res) => {
 
 // GET /orders/:id/payments → list all payments for this order
 router.get('/:id/payments', validate(idSchema), async (req, res) => {
-  const Payment = require('../models/Payment');
+  const Payment = require('../models/payment');
   const payments = await Payment.find({ orderId: req.params.id }).sort({ createdAt: -1 }).lean();
   res.json({ ok: true, count: payments.length, payments });
 });
+
+const Payment = require('../models/payment');
+
+router.get('/:id/payments', async (req, res) => {
+  try {
+    const payments = await Payment.find({ orderId: req.params.id })
+      .sort({ createdAt: -1 })
+      .lean();
+    res.json({ ok: true, count: payments.length, payments });
+  } catch {
+    res.status(400).json({ ok: false, error: 'invalid id' });
+  }
+});
+
 
 module.exports = router;
